@@ -120,7 +120,7 @@ async function doProof(){
         iter++;
         for(let i = 0; i < 1000; i++){
             let r = Math.floor(Math.random()*100000000);
-            let t = await sha256((time+r)+'[--salt--]');
+            let t = await sha256(`${time}${r}[--salt--]`);
             if(t.toString().startsWith('0000')){
                 document.getElementById('errs').innerText = `Complete!`;
                 document.getElementById('bar').style.width = `100%`;
