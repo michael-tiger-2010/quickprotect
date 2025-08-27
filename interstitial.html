@@ -118,10 +118,10 @@ async function doProof(){
     let iter = 0;
     (async function st(){
         iter++;
-        for(let i = 0; i < 1000; i++){
+        for(let i = 0; i < 5000; i++){
             let r = Math.floor(Math.random()*100000000);
             let t = await sha256(`${time}${r}[--salt--]`);
-            if(t.toString().startsWith('0000')){
+            if(t.toString().startsWith('00000')){
                 document.getElementById('errs').innerText = `Complete!`;
                 document.getElementById('bar').style.width = `100%`;
                 Cookies.set('mathdragon-proof-verif-answer', t.toString()); // the actual answer
