@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html>
+<style>
+body,html{
+    background-color: #111924;
+    padding-left:10vw;
+    padding-right:10vw;
+}
+*{
+    font-family:monospace;
+    color:white;
+}
+hr{
+    height: 3px;
+    color: #ad1d61;
+    background: #ad1d61;
+    font-size: 0;
+    border: 0;
+}
+footer{
+    position:fixed;
+    bottom:0px;
+    width:60vw;
+}
+#cont{
+    position:relative;
+    height:1.3em;
+}
+#errs{
+    text-align:center;position:absolute;z-index:100;top:0px;left:0px;width:100%;height:100%;
+}
+#bar{
+    position:absolute;z-index:1;top:0px;left:0px;width:0%;height:100%;background-color:rgba(255,255,255,0.2);
+}
+
+@media (max-width: 768px) {
+    body, html {
+        padding-left: 1rem;
+        padding-right: 1rem;
+    }
+}
+
+</style>
+<br><br><hr><br>
+<h1>Please wait. The MathDragon would like to check your browser.</h1>
+<p>It's not an error, but in this age of AI web scraping, we want to make sure that you are human.</p>
+<br><br><br>
+<div id="cont">
+<div id="errs"></div>
+<div id="bar"></div>
+</div>
+<footer>
+<br><div id="info" style="text-align:center;font-size:0.8rem;opacity:0.7"></div><hr><br><br>
+</footer>
+<script>
+// JS COOKIE
+!function(e,t){"object"==typeof exports&&"undefined"!=typeof module?module.exports=t():"function"==typeof define&&define.amd?define(t):(e="undefined"!=typeof globalThis?globalThis:e||self,function(){var n=e.Cookies,o=e.Cookies=t();o.noConflict=function(){return e.Cookies=n,o}}())}(this,(function(){"use strict";function e(e){for(var t=1;t<arguments.length;t++){var n=arguments[t];for(var o in n)e[o]=n[o]}return e}var t=function t(n,o){function r(t,r,i){if("undefined"!=typeof document){"number"==typeof(i=e({},o,i)).expires&&(i.expires=new Date(Date.now()+864e5*i.expires)),i.expires&&(i.expires=i.expires.toUTCString()),t=encodeURIComponent(t).replace(/%(2[346B]|5E|60|7C)/g,decodeURIComponent).replace(/[()]/g,escape);var c="";for(var u in i)i[u]&&(c+="; "+u,!0!==i[u]&&(c+="="+i[u].split(";")[0]));return document.cookie=t+"="+n.write(r,t)+c}}return Object.create({set:r,get:function(e){if("undefined"!=typeof document&&(!arguments.length||e)){for(var t=document.cookie?document.cookie.split("; "):[],o={},r=0;r<t.length;r++){var i=t[r].split("="),c=i.slice(1).join("=");try{var u=decodeURIComponent(i[0]);if(o[u]=n.read(c,u),e===u)break}catch(e){}}return e?o[e]:o}},remove:function(t,n){r(t,"",e({},n,{expires:-1}))},withAttributes:function(n){return t(this.converter,e({},this.attributes,n))},withConverter:function(n){return t(e({},this.converter,n),this.attributes)}},{attributes:{value:Object.freeze(o)},converter:{value:Object.freeze(n)}})}({read:function(e){return'"'===e[0]&&(e=e.slice(1,-1)),e.replace(/(%[\dA-F]{2})+/gi,decodeURIComponent)},write:function(e){return encodeURIComponent(e).replace(/%(2[346BF]|3[AC-F]|40|5[BDE]|60|7[BCD])/g,decodeURIComponent)}},{path:"/"});return t}));
+
+
+async function sha256(message) {
+    const msgBuffer = new TextEncoder().encode(message);                    
+    const hashBuffer = await crypto.subtle.digest('SHA-256', msgBuffer);
+    const hashArray = Array.from(new Uint8Array(hashBuffer));
+    const hashHex = hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
+    return hashHex;
+}
+function sieve(n,cb){
+  let lim=Math.ceil(n*Math.log(n)+n*Math.log(Math.log(n)))||15, // upper bound estimate
+      a=new Uint8Array(lim),p=[],i=2,b=1e4,ba=1; // batch size
+  (function step(s){
+    for(;i<lim&&p.length<n;i++){
+      if(!a[i]){
+        p.push(i);
+        for(let j=i*i;j<lim;j+=i)a[j]=1;
+      }
+      if(++s>=b){
+        ba++;
+        document.getElementById('errs').innerText = `Primes ${Math.min(Math.ceil(ba*100/89),100)}`;
+        document.getElementById('bar').style.width = `${Math.min(Math.ceil(ba*100/178),50)}%`
+        setTimeout(()=>step(0));return;}
+    }
+    cb();
+  })(0);
+}
+
+
+let sieveCheck = Date.now();
+
+document.getElementById('info').innerText = `access_time: ${sieveCheck}; user_agent: ${window.navigator.userAgent}`
+
+if(Date.now()-(+Cookies.get('mathdragon-proof-verif-time')) < 10000){
+    document.getElementById('errs').innerText = 'The timing seems to be too fast. Please contact the site owner for help.';
+}else{
+
+// to ward off any web scrapers that might be trying to scrape
+// this is not gonna stop targeted scrapers; they can bypass this easily.
+sieve(70000,(e)=>{
+    if(Date.now()-sieveCheck>4000){
+        // fallback to check if this is a scraper or just an old device.
+        let alertCheck = Date.now();
+        alert('Press OK to continue.');
+        if(Date.now()-alertCheck<150){
+            document.getElementById('errs').innerText = 'Oh no, it seems you\'re a bot. Reload to try again. :(';
+        }else{
+            doProof();
+        }
+    }else{
+        doProof();
+    }
+});
+
+}
+// main function for preventing targeted scraping
+// I don't have enough money for a more secure, id-based system
+// this is vunrable to precomputation
+async function doProof(){
+    let time = Date.now();
+    let iter = 0;
+    (async function st(){
+        iter++;
+        for(let i = 0; i < 1000; i++){
+            let r = Math.floor(Math.random()*100000000);
+            let t = await sha256((time+r)+'[--salt--]');
+            if(t.toString().startsWith('0000')){
+                document.getElementById('errs').innerText = `Complete!`;
+                document.getElementById('bar').style.width = `100%`;
+                Cookies.set('mathdragon-proof-verif-answer', t.toString()); // the actual answer
+                Cookies.set('mathdragon-proof-verif-secret', r.toString()); // the actual answer
+                Cookies.set('mathdragon-proof-verif-time', time); // server should check if it's within a specified interval
+                location.reload();
+                return;
+            }
+        }
+        let c = Math.floor(iter*100/50);
+        document.getElementById('errs').innerText = `Hash ${(c>100?"(almost there...)":"")} ${c}%`;
+        document.getElementById('bar').style.width = `${Math.min(iter+50,100)}%`;
+        setTimeout(st);
+        return;
+    })()
+}
+</script>
+</html>
